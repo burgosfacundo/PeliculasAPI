@@ -8,8 +8,11 @@ namespace PeliculasAPI.Helpers
     {
         public AutoMapperProfiles()
         {
-            CreateMap<Genre, GenreDTOResponse>().ReverseMap();
+            CreateMap<Genre, GenreDTOResponse>();
             CreateMap<GenreDTORequest, Genre>();
+
+            CreateMap<Actor, ActorDTOResponse>();
+            CreateMap<ActorDTORequest, Actor>();
         }
     }
 }

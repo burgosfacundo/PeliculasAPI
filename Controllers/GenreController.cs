@@ -23,8 +23,7 @@ namespace PeliculasAPI.Controllers
         public async Task<ActionResult<List<GenreDTOResponse>>> GetAll()
         {
             var genres = await context.Genres.ToListAsync();
-            var dtos = mapper.Map<List<GenreDTOResponse>>(genres);
-            return dtos;
+            return mapper.Map<List<GenreDTOResponse>>(genres);
         }
 
         [HttpGet("{id:int}")]
@@ -36,8 +35,7 @@ namespace PeliculasAPI.Controllers
                 return NotFound($"The genre with id:{id} not exists");
             }
 
-            var dto = mapper.Map<GenreDTOResponse>(genre);
-            return dto;
+            return mapper.Map<GenreDTOResponse>(genre);
         }
 
         [HttpPost]
