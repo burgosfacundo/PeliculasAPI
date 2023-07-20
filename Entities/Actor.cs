@@ -11,6 +11,6 @@ namespace PeliculasAPI.Entities
 
         public DateTime BirthDate { get; set; }
 
-        public string Photo { get; set; }
+        public string Image { get; set; }
     }
 }

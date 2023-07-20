@@ -38,7 +38,7 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] ActorDTORequest dto)
+        public async Task<ActionResult> Post([FromForm] ActorDTORequest dto)
         {
             var exists = await context.Actors.AnyAsync(a => a.Name == dto.Name);
             if (exists)
@@ -55,7 +55,7 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromBody] ActorDTORequest dto) 
+        public async Task<ActionResult> Put(int id, [FromForm] ActorDTORequest dto) 
         {
             var exists = context.Actors.AnyAsync(a => a.Id == id);
             if (!exists.Result)
