@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeliculasAPI.Entities;
 using PeliculasAPI.Entities.DTOs;
+using PeliculasAPI.Services;
 
 namespace PeliculasAPI.Controllers
 {
@@ -12,11 +13,14 @@ namespace PeliculasAPI.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly IMapper mapper;
+        private readonly IStoreFile storeFile;
+        private readonly string container = "actors";
 
-        public ActorController(ApplicationDBContext context, IMapper mapper)
+        public ActorController(ApplicationDBContext context, IMapper mapper, IStoreFile storeFile)
         {
             this.context = context;
             this.mapper = mapper;
+            this.storeFile = storeFile;
         }
 
         [HttpGet]
@@ -48,6 +52,17 @@ namespace PeliculasAPI.Controllers
 
             var actor = mapper.Map<Actor>(dto);
 
+            if (dto.Image != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await dto.Image.CopyToAsync(memoryStream);
+                    var content = memoryStream.ToArray();
+                    var extension = Path.GetExtension(dto.Image.FileName);
+                    actor.Image = await storeFile.SaveFile(content, extension, container, dto.Image.ContentType);
+                }
+            }
+
             context.Actors.Add(actor);
             await context.SaveChangesAsync();
 
@@ -57,16 +72,26 @@ namespace PeliculasAPI.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult> Put(int id, [FromForm] ActorDTORequest dto) 
         {
-            var exists = context.Actors.AnyAsync(a => a.Id == id);
-            if (!exists.Result)
+            var actorDB = await context.Actors.FirstOrDefaultAsync(a => a.Id == id);
+            if (actorDB == null)
             {
                 return NotFound($"The actor with id:{id} not exists");
             }
 
-            var actor = mapper.Map<Actor>(dto);
-            actor.Id = id;
+            actorDB = mapper.Map(dto,actorDB);
 
-            context.Actors.Entry(actor).State = EntityState.Modified;
+            if (dto.Image != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await dto.Image.CopyToAsync(memoryStream);
+                    var content = memoryStream.ToArray();
+                    var extension = Path.GetExtension(dto.Image.FileName);
+                    actorDB.Image = await storeFile.EditFile(content, extension, container,actorDB.Image,
+                                                                    dto.Image.ContentType);
+                }
+            }
+
             await context.SaveChangesAsync();
 
             return NoContent();

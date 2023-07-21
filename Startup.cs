@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PeliculasAPI.Services;
 using System.Text.Json.Serialization;
 
 namespace PeliculasAPI
@@ -15,6 +16,9 @@ namespace PeliculasAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddTransient<IStoreFile,LocalFileStore>();
+            services.AddHttpContextAccessor();
 
             services.AddDbContext<ApplicationDBContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -35,6 +39,9 @@ namespace PeliculasAPI
             }
 
             app.UseHttpsRedirection();
+
+
+            app.UseStaticFiles();
 
             app.UseRouting();
 

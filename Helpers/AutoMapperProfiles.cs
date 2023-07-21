@@ -12,7 +12,7 @@ namespace PeliculasAPI.Helpers
             CreateMap<GenreDTORequest, Genre>();
 
             CreateMap<Actor, ActorDTOResponse>();
-            CreateMap<ActorDTORequest, Actor>();
+            CreateMap<ActorDTORequest, Actor>().ForMember(a => a.Image, options => options.Ignore());
         }
     }
 }
