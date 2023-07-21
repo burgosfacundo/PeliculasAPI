@@ -24,7 +24,7 @@ namespace PeliculasAPI
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers().AddJsonOptions(x =>
-            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles).AddNewtonsoftJson();
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
