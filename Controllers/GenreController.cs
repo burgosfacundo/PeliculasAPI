@@ -32,7 +32,7 @@ namespace PeliculasAPI.Controllers
             var genre = await context.Genres.FirstOrDefaultAsync(g => g.Id == id);
             if (genre == null)
             {
-                return NotFound($"The genre with id:{id} not exists");
+                return NotFound($"The genre with id:{id} doesn't exist");
             }
 
             return mapper.Map<GenreDTOResponse>(genre);
@@ -61,7 +61,7 @@ namespace PeliculasAPI.Controllers
             var exists = context.Genres.AnyAsync(g => g.Id == id);
             if (!exists.Result)
             {
-                return NotFound($"The genre with id:{id} not exists");
+                return NotFound($"The genre with id:{id} doesn't exist");
             }
 
             var genre = mapper.Map<Genre>(dto);
@@ -79,7 +79,7 @@ namespace PeliculasAPI.Controllers
             var exists = context.Genres.AnyAsync(g => g.Id == id);
             if (!exists.Result)
             {
-                return NotFound($"The genre with id:{id} not exists");
+                return NotFound($"The genre with id:{id} doesn't exist");
             }
 
             context.Genres.Remove( new Genre

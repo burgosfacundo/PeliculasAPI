@@ -2,14 +2,12 @@
 
 namespace PeliculasAPI.Entities.DTOs
 {
-    public class ActorDTOResponse
+    public class MovieDTOResponse
     {
         public int Id { get; set; }
-
-        public string Name { get; set; }
-
-        public DateTime BirthDate { get; set; }
-
+        public string Title { get; set; }
+        public bool OnBillboard { get; set; }
+        public DateTime ReleaseDate { get; set; }
         public string Image { get; set; }
     }
 }

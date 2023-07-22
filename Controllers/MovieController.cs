@@ -6,19 +6,20 @@ using PeliculasAPI.Entities;
 using PeliculasAPI.Entities.DTOs;
 using PeliculasAPI.Helpers;
 using PeliculasAPI.Services;
+using System.ComponentModel;
 
 namespace PeliculasAPI.Controllers
 {
     [ApiController]
-    [Route("api/actors")]
-    public class ActorController : ControllerBase
+    [Route("api/movies")]
+    public class MovieController : ControllerBase
     {
         private readonly ApplicationDBContext context;
         private readonly IMapper mapper;
         private readonly IStoreFile storeFile;
-        private readonly string container = "actors";
+        private readonly string container = "movies";
 
-        public ActorController(ApplicationDBContext context, IMapper mapper, IStoreFile storeFile)
+        public MovieController(ApplicationDBContext context,IMapper mapper,IStoreFile storeFile)
         {
             this.context = context;
             this.mapper = mapper;
@@ -26,36 +27,37 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ActorDTOResponse>>> GetAll([FromQuery] PaginationDTO paginationDTO)
+        public async Task<ActionResult<List<MovieDTOResponse>>> GetAll([FromQuery] PaginationDTO paginationDTO)
         {
-            var queryable = context.Actors.AsQueryable();
+            var queryable = context.Movies.AsQueryable();
             await HttpContext.InsertParamsPagination(queryable, paginationDTO.RecordsPerPage);
 
-            var actors = await queryable.Paginate(paginationDTO).ToListAsync();
-            return mapper.Map<List<ActorDTOResponse>>(actors);   
+            var movies = await queryable.Paginate(paginationDTO).ToListAsync();
+            return mapper.Map<List<MovieDTOResponse>>(movies);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ActorDTOResponse>> GetById(int id)
+        public async Task<ActionResult<MovieDTOResponse>> GetById(int id) 
         {
-            var actor = await context.Actors.FirstOrDefaultAsync(a => a.Id == id);
-            if (actor == null)
+            var movie = await context.Movies.FirstOrDefaultAsync(m => m.Id == id);
+            if(movie == null)
             {
-                return NotFound($"The actor with id:{id} doesn't exist");
+                return NotFound($"The movie with id:{id} doesn't exist");
             }
-            return mapper.Map<ActorDTOResponse>(actor);
+
+            return mapper.Map<MovieDTOResponse>(movie);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromForm] ActorDTORequest dto)
+        public async Task<ActionResult> Post([FromForm] MovieDTORequest dto)
         {
-            var exists = await context.Actors.AnyAsync(a => a.Name == dto.Name);
+            var exists = await context.Movies.AnyAsync(m => m.Title == dto.Title);
             if (exists)
             {
-                return BadRequest($"An actor with the name {dto.Name} already exists");
+                return BadRequest($"A movie with the title {dto.Title} already exists");
             }
 
-            var actor = mapper.Map<Actor>(dto);
+            var movie = mapper.Map<Movie>(dto);
 
             if (dto.Image != null)
             {
@@ -64,26 +66,26 @@ namespace PeliculasAPI.Controllers
                     await dto.Image.CopyToAsync(memoryStream);
                     var content = memoryStream.ToArray();
                     var extension = Path.GetExtension(dto.Image.FileName);
-                    actor.Image = await storeFile.SaveFile(content, extension, container, dto.Image.ContentType);
+                    movie.Image = await storeFile.SaveFile(content, extension, container, dto.Image.ContentType);
                 }
             }
 
-            context.Actors.Add(actor);
+            context.Movies.Add(movie);
             await context.SaveChangesAsync();
 
-            return Ok(actor);
+            return Ok(movie);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromForm] ActorDTORequest dto) 
+        public async Task<ActionResult> Put(int id, [FromForm] MovieDTORequest dto)
         {
-            var actorDB = await context.Actors.FirstOrDefaultAsync(a => a.Id == id);
-            if (actorDB == null)
+            var moviesDB = await context.Movies.FirstOrDefaultAsync(m => m.Id == id);
+            if (moviesDB == null)
             {
-                return NotFound($"The actor with id:{id} doesn't exist");
+                return NotFound($"The movie with id:{id} doesn't exist");
             }
 
-            actorDB = mapper.Map(dto,actorDB);
+            moviesDB = mapper.Map(dto, moviesDB);
 
             if (dto.Image != null)
             {
@@ -92,7 +94,7 @@ namespace PeliculasAPI.Controllers
                     await dto.Image.CopyToAsync(memoryStream);
                     var content = memoryStream.ToArray();
                     var extension = Path.GetExtension(dto.Image.FileName);
-                    actorDB.Image = await storeFile.EditFile(content, extension, container,actorDB.Image,
+                    moviesDB.Image = await storeFile.EditFile(content, extension, container, moviesDB.Image,
                                                                     dto.Image.ContentType);
                 }
             }
@@ -103,23 +105,23 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<ActorDTOPatch> patchDocument)
+        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<MovieDTOPatch> patchDocument)
         {
-            if(patchDocument == null)
+            if (patchDocument == null)
             {
                 return BadRequest();
             }
 
-            var actor = await context.Actors.FirstOrDefaultAsync(a =>a.Id == id);
+            var movie = await context.Movies.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (actor == null)
+            if (movie == null)
             {
-                return NotFound($"The actor with id:{id} doesn't exist");
+                return NotFound($"The movie with id:{id} doesn't exist");
             }
 
-            var dto = mapper.Map<ActorDTOPatch>(actor);
+            var dto = mapper.Map<MovieDTOPatch>(movie);
 
-            patchDocument.ApplyTo(dto,ModelState);
+            patchDocument.ApplyTo(dto, ModelState);
             var valid = TryValidateModel(dto);
 
             if (!valid)
@@ -127,30 +129,27 @@ namespace PeliculasAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            mapper.Map(dto, actor);
+            mapper.Map(dto, movie);
             await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-
-
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var exists = context.Actors.AnyAsync(a => a.Id == id);
+            var exists = context.Movies.AnyAsync(m => m.Id == id);
             if (!exists.Result)
             {
-                return NotFound($"The actor with id:{id} doesn't exist");
+                return NotFound($"The movie with id:{id} doesn't exist");
             }
 
-            context.Actors.Remove(new Actor
+            context.Movies.Remove(new Movie
             {
                 Id = id
             });
             await context.SaveChangesAsync();
             return NoContent();
         }
-
     }
 }
