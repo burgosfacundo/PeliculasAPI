@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeliculasAPI.Entities;
 using PeliculasAPI.Entities.DTOs;
+using PeliculasAPI.Helpers;
 using PeliculasAPI.Services;
 
 namespace PeliculasAPI.Controllers
@@ -25,9 +26,12 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ActorDTOResponse>>> GetAll()
+        public async Task<ActionResult<List<ActorDTOResponse>>> GetAll([FromQuery] PaginationDTO paginationDTO)
         {
-            var actors = await context.Actors.ToListAsync();
+            var queryable = context.Actors.AsQueryable();
+            await HttpContext.InsertParamsPagination(queryable, paginationDTO.RecordsPerPage);
+
+            var actors = await queryable.Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<ActorDTOResponse>>(actors);   
         }
 
@@ -107,6 +111,7 @@ namespace PeliculasAPI.Controllers
             }
 
             var actor = await context.Actors.FirstOrDefaultAsync(a =>a.Id == id);
+
             if (actor == null)
             {
                 return NotFound($"The actor with id:{id} not exists");
@@ -116,6 +121,7 @@ namespace PeliculasAPI.Controllers
 
             patchDocument.ApplyTo(dto,ModelState);
             var valid = TryValidateModel(dto);
+
             if (!valid)
             {
                 return BadRequest(ModelState);
