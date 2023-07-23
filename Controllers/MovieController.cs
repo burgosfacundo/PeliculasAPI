@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PeliculasAPI.Entities;
 using PeliculasAPI.Entities.DTOs;
 using PeliculasAPI.Helpers;
+using PeliculasAPI.Migrations;
 using PeliculasAPI.Services;
 using System.ComponentModel;
 
@@ -70,6 +71,7 @@ namespace PeliculasAPI.Controllers
                 }
             }
 
+            AsignOrderActors(movie);
             context.Movies.Add(movie);
             await context.SaveChangesAsync();
 
@@ -77,15 +79,18 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromForm] MovieDTORequest dto)
+        public async Task<ActionResult> Put(int id, [FromBody] MovieDTORequest dto)
         {
-            var moviesDB = await context.Movies.FirstOrDefaultAsync(m => m.Id == id);
-            if (moviesDB == null)
+            var movies = await context.Movies
+                                    .Include(m => m.MoviesActors)
+                                    .Include(m => m.MoviesGenres)
+                                    .FirstOrDefaultAsync(m => m.Id == id);
+            if (movies == null)
             {
                 return NotFound($"The movie with id:{id} doesn't exist");
             }
 
-            moviesDB = mapper.Map(dto, moviesDB);
+            movies = mapper.Map(dto, movies);
 
             if (dto.Image != null)
             {
@@ -94,11 +99,12 @@ namespace PeliculasAPI.Controllers
                     await dto.Image.CopyToAsync(memoryStream);
                     var content = memoryStream.ToArray();
                     var extension = Path.GetExtension(dto.Image.FileName);
-                    moviesDB.Image = await storeFile.EditFile(content, extension, container, moviesDB.Image,
+                    movies.Image = await storeFile.EditFile(content, extension, container, movies.Image,
                                                                     dto.Image.ContentType);
                 }
             }
 
+            AsignOrderActors(movies);
             await context.SaveChangesAsync();
 
             return NoContent();
@@ -150,6 +156,17 @@ namespace PeliculasAPI.Controllers
             });
             await context.SaveChangesAsync();
             return NoContent();
+        }
+
+        private void AsignOrderActors(Movie movie)
+        {
+            if (movie.MoviesActors != null)
+            {
+                for(int i=0;i < movie.MoviesActors.Count; i++)
+                {
+                    movie.MoviesActors[i].Order = i;
+                }
+            }
         }
     }
 }

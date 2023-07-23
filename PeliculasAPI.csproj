@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\movies\02341213-8eb0-40d6-a2fd-274b7d04ad33.jpeg" />
+    <Content Remove="wwwroot\movies\27c26b21-e36c-4dac-bafb-e2e798cf99d3.jpeg" />
+    <Content Remove="wwwroot\movies\83d2989c-0ee2-474d-9078-a400f1ecb65b.jpeg" />
+    <Content Remove="wwwroot\movies\92d4cf25-828a-45d1-9131-8889238cdbe8.jpeg" />
+    <Content Remove="wwwroot\movies\c3ede03a-106b-49ca-b794-15124b0ff3a7.jpeg" />
+    <Content Remove="wwwroot\movies\cfc7404a-6061-4198-a53b-fadb599eeae4.jpeg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.9" />

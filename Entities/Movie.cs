@@ -11,5 +11,7 @@ namespace PeliculasAPI.Entities
         public bool OnBillboard { get; set; }
         public DateTime ReleaseDate { get; set; }
         public string Image { get; set; }
+        public List<MovieGenre> MoviesGenres { get; set; }
+        public List<MovieActor> MoviesActors { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PeliculasAPI;
 
@@ -11,9 +12,11 @@ using PeliculasAPI;
 namespace PeliculasAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230722212132_Relation_Entities")]
+    partial class Relation_Entities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,7 +94,7 @@ namespace PeliculasAPI.Migrations
                     b.ToTable("Movies");
                 });
 
-            modelBuilder.Entity("PeliculasAPI.Entities.MovieActor", b =>
+            modelBuilder.Entity("PeliculasAPI.Entities.MoviesActors", b =>
                 {
                     b.Property<int>("IdMovie")
                         .HasColumnType("int");
@@ -120,7 +123,7 @@ namespace PeliculasAPI.Migrations
                     b.ToTable("MoviesActors");
                 });
 
-            modelBuilder.Entity("PeliculasAPI.Entities.MovieGenre", b =>
+            modelBuilder.Entity("PeliculasAPI.Entities.MoviesGenres", b =>
                 {
                     b.Property<int>("IdGenre")
                         .HasColumnType("int");
@@ -143,14 +146,14 @@ namespace PeliculasAPI.Migrations
                     b.ToTable("MoviesGenres");
                 });
 
-            modelBuilder.Entity("PeliculasAPI.Entities.MovieActor", b =>
+            modelBuilder.Entity("PeliculasAPI.Entities.MoviesActors", b =>
                 {
                     b.HasOne("PeliculasAPI.Entities.Actor", "Actor")
-                        .WithMany("MoviesActors")
+                        .WithMany()
                         .HasForeignKey("ActorId");
 
                     b.HasOne("PeliculasAPI.Entities.Movie", "Movie")
-                        .WithMany("MoviesActors")
+                        .WithMany()
                         .HasForeignKey("MovieId");
 
                     b.Navigation("Actor");
@@ -158,36 +161,19 @@ namespace PeliculasAPI.Migrations
                     b.Navigation("Movie");
                 });
 
-            modelBuilder.Entity("PeliculasAPI.Entities.MovieGenre", b =>
+            modelBuilder.Entity("PeliculasAPI.Entities.MoviesGenres", b =>
                 {
                     b.HasOne("PeliculasAPI.Entities.Genre", "Genre")
-                        .WithMany("MoviesGenres")
+                        .WithMany()
                         .HasForeignKey("GenreId");
 
                     b.HasOne("PeliculasAPI.Entities.Movie", "Movie")
-                        .WithMany("MoviesGenres")
+                        .WithMany()
                         .HasForeignKey("MovieId");
 
                     b.Navigation("Genre");
 
                     b.Navigation("Movie");
-                });
-
-            modelBuilder.Entity("PeliculasAPI.Entities.Actor", b =>
-                {
-                    b.Navigation("MoviesActors");
-                });
-
-            modelBuilder.Entity("PeliculasAPI.Entities.Genre", b =>
-                {
-                    b.Navigation("MoviesGenres");
-                });
-
-            modelBuilder.Entity("PeliculasAPI.Entities.Movie", b =>
-                {
-                    b.Navigation("MoviesActors");
-
-                    b.Navigation("MoviesGenres");
                 });
 #pragma warning restore 612, 618
         }
